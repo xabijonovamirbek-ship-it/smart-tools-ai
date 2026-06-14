@@ -196,7 +196,6 @@ function PortfolioTool() {
       )}
       {result?.error && <p style={{ color: "#f87171", fontSize: 13, textAlign: "center" }}>{result.error}</p>}
     </div>
-    </div>
   );
 }
 
