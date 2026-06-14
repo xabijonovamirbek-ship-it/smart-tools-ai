@@ -204,7 +204,7 @@ function ResumeTool() {
       {result?.error && <p style={{ color: "#f87171", fontSize: 13, textAlign: "center" }}>{result.error}</p>}
     </div>
   );
- ng: 2, marginBottom: 10 }}>О себе</p>
+ <p style={{ color: "#7C3AED", fontSize: 11, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10 }}>О себе</p>
             <p style={{ color: "rgba(255,255,255,0.8)", fontSize: 13, lineHeight: 1.8 }}>{result.bio}</p>
           </div>
           <div style={S.card}>
