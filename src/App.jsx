@@ -479,3 +479,66 @@ function NamesTool() {
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {result.map((item, i) => (
             <div key={i} style
+      ={{ ...S.card, display: "flex", alignItems: "flex-start", gap: 12 }}>
+              <span style={{ fontSize: 28 }}>{gender === "boy" ? "👦" : "👧"}</span>
+              <div>
+                <p style={{ color: "#fff", fontWeight: 700, fontSize: 16 }}>{item.name}</p>
+                <p style={{ color: "#a78bfa", fontSize: 12, marginTop: 2 }}>{item.origin}</p>
+                <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 13, marginTop: 4 }}>{item.meaning}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MAIN ────────────────────────────────────────────────────────────────────
+export default function App() {
+  const [tab, setTab] = useState("resume");
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)",
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+      color: "#fff",
+    }}>
+      <div style={{ padding: "32px 20px 16px" }}>
+        <h1 style={{ fontSize: 26, fontWeight: 900, margin: 0, letterSpacing: -0.5 }}>✦ Smart Tools</h1>
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: 13, marginTop: 4 }}>AI инструменты в одном месте</p>
+      </div>
+
+      <div style={{ display: "flex", gap: 8, padding: "0 20px 16px", overflowX: "auto" }}>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "10px 16px",
+              borderRadius: 18,
+              background: tab === t.id ? "#7C3AED" : "rgba(255,255,255,0.08)",
+              color: tab === t.id ? "#fff" : "rgba(255,255,255,0.55)",
+              fontWeight: 600, fontSize: 13,
+              border: "none", cursor: "pointer",
+              whiteSpace: "nowrap", flexShrink: 0,
+              boxShadow: tab === t.id ? "0 4px 20px rgba(124,58,237,0.4)" : "none",
+            }}
+          >
+            <span>{t.icon}</span>
+            <span>{t.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div style={{ padding: "0 20px 40px" }}>
+        {tab === "resume" && <ResumeTool />}
+        {tab === "translate" && <TranslateTool />}
+        {tab === "poem" && <PoemTool />}
+        {tab === "names" && <NamesTool />}
+      </div>
+    </div>
+  );
+}    
