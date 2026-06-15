@@ -54,8 +54,7 @@ function ResumeTool() {
     try {
       const prompt = `Создай профессиональное резюме на ${langLabels[form.lang]} языке. Верни ТОЛЬКО JSON без markdown: {"name":"","jobTitle":"","contact":"Телефон | Email | Город","summary":"","experience":[{"role":"","company":"","desc":""}],"education":"","skills":[]} Данные: Имя: ${form.firstName} ${form.lastName}, Телефон: ${form.phone}, Email: ${form.email}, Город: ${form.city}, Должность: ${form.jobTitle}, Компания: ${form.company}, Опыт: ${form.experience}, Образование: ${form.education}, Навыки: ${form.skills}`;
       const raw = await callAI(prompt, "You are a professional resume writer. Return only valid JSON, no markdown.");
-      const match = raw.match(/\{[\s\S]*\}/); const clean = match ? match[0] : raw.replace(/```json|```/g, "").trim();
-      setResult(JSON.parse(clean));
+      const match = raw.match(/\{[\s\S]*\}/); const clean = match ? match[0] : raw.replace(/```json|```/g, "").trim(); setResult(JSON.parse(clean));
     } catch (e) { setResult({ error: "Ошибка генерации. Попробуй снова." }); }
     setLoading(false);
   };
