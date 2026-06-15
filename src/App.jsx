@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 const LANGUAGES = [{ code: "ru", label: "Русский" },{ code: "uz", label: "O'zbek" },{ code: "en", label: "English" }];
-const TABS = [{ id: "resume", icon: "📄", label: "Резюме" },{ id: "portfolio", icon: "💼", label: "Портфолио" },{ id: "translate", icon: "🌐", label: "Перевод" },{ id: "poem", icon: "✍️", label: "Стихи" },{ id: "names", icon: "👶", label: "Имена" }];
+const TABS = [{ id: "resume", icon: "📄", label: "Резюме" },{ id: "portfolio", icon: "💼", label: "Портфолио" },{ id: "translate", icon: "🌐", label: "Перевод" },{ id: "poem", icon: "✍️", label: "Стихи" },{ id: "names", icon: "👶", label: "Имена" },{ id: "calc", icon: "🧮", label: "Калькулятор" }];
 const S = { input: { width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "12px 16px", color: "#fff", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "inherit" }, textarea: { width: "100%", background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "12px 16px", color: "#fff", fontSize: 14, outline: "none", boxSizing: "border-box", fontFamily: "inherit", resize: "none" }, btnPrimary: { width: "100%", padding: "14px 0", borderRadius: 18, background: "linear-gradient(135deg, #7C3AED, #9333EA)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }, btnPrimaryDisabled: { width: "100%", padding: "14px 0", borderRadius: 18, background: "linear-gradient(135deg, #7C3AED, #9333EA)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "not-allowed", opacity: 0.4 }, btnLang: (a) => ({ flex: 1, padding: "10px 0", borderRadius: 14, background: a ? "#7C3AED" : "rgba(255,255,255,0.08)", color: a ? "#fff" : "rgba(255,255,255,0.5)", fontWeight: 600, fontSize: 13, border: "none", cursor: "pointer" }), card: { background: "rgba(255,255,255,0.07)", borderRadius: 18, padding: 20, border: "1px solid rgba(255,255,255,0.12)" } };
 async function callAI(prompt, sys) {
   const r = await fetch("/api/claude", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ model: "gemini", max_tokens: 1000, system: sys || "You are a helpful assistant.", messages: [{ role: "user", content: prompt }] }) });
@@ -212,6 +212,78 @@ function NamesTool() {
     </div>
   );
 }
+function CalcTool() {
+  const [mode, setMode] = useState("currency");
+  // --- Currency converter state ---
+  const CURRENCIES = [{ code: "cny", label: "Юань (CNY)" },{ code: "usd", label: "Доллар (USD)" },{ code: "uzs", label: "Сум (UZS)" }];
+  const RATES_TO_USD = { cny: 1 / 7.2, usd: 1, uzs: 1 / 12700 };
+  const [amount, setAmount] = useState("");
+  const [curFrom, setCurFrom] = useState("cny");
+  const [curTo, setCurTo] = useState("uzs");
+  const convert = () => {
+    const n = parseFloat(amount);
+    if (isNaN(n)) return "";
+    const usd = n * RATES_TO_USD[curFrom];
+    const result = usd / RATES_TO_USD[curTo];
+    return result.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+  };
+  const swapCur = () => { setCurFrom(curTo); setCurTo(curFrom); };
+  // --- Cargo calculator state ---
+  const CARGO_RATES = { auto: 5.88, avia: 9 };
+  const [cargoType, setCargoType] = useState("auto");
+  const [grams, setGrams] = useState("");
+  const [cargoCurrency, setCargoCurrency] = useState("usd");
+  const cargoResult = () => {
+    const g = parseFloat(grams);
+    if (isNaN(g)) return "";
+    const kg = g / 1000;
+    const usd = kg * CARGO_RATES[cargoType];
+    if (cargoCurrency === "usd") return usd.toLocaleString("ru-RU", { maximumFractionDigits: 2 });
+    const uzs = usd / RATES_TO_USD.uzs;
+    return uzs.toLocaleString("ru-RU", { maximumFractionDigits: 0 });
+  };
+  const ss = { flex: 1, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 14, padding: "12px", color: "#fff", fontSize: 13, outline: "none" };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button onClick={() => setMode("currency")} style={S.btnLang(mode === "currency")}>💱 Конвертер валют</button>
+        <button onClick={() => setMode("cargo")} style={S.btnLang(mode === "cargo")}>📦 Карго</button>
+      </div>
+      {mode === "currency" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <select value={curFrom} onChange={e => setCurFrom(e.target.value)} style={ss}>{CURRENCIES.map(c => <option key={c.code} value={c.code} style={{ background: "#1a1a2e" }}>{c.label}</option>)}</select>
+            <button onClick={swapCur} style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(124,58,237,0.3)", color: "#fff", border: "none", cursor: "pointer", fontSize: 18, flexShrink: 0 }}>⇄</button>
+            <select value={curTo} onChange={e => setCurTo(e.target.value)} style={ss}>{CURRENCIES.map(c => <option key={c.code} value={c.code} style={{ background: "#1a1a2e" }}>{c.label}</option>)}</select>
+          </div>
+          <input style={S.input} type="number" placeholder="Сумма" value={amount} onChange={e => setAmount(e.target.value)} />
+          {amount && <div style={S.card}>
+            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, marginBottom: 8 }}>Результат</p>
+            <p style={{ color: "#fff", fontSize: 22, fontWeight: 700 }}>{convert()} {CURRENCIES.find(c => c.code === curTo)?.code.toUpperCase()}</p>
+          </div>}
+          <p style={{ color: "rgba(255,255,255,0.35)", fontSize: 11, textAlign: "center" }}>Курсы примерные, для точных сумм проверяй актуальный курс</p>
+        </div>
+      )}
+      {mode === "cargo" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ display: "flex", gap: 10 }}>
+            <button onClick={() => setCargoType("auto")} style={{ flex: 1, padding: "12px 0", borderRadius: 18, background: cargoType === "auto" ? "#7C3AED" : "rgba(255,255,255,0.08)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>🚚 Авто ($5.88/кг)</button>
+            <button onClick={() => setCargoType("avia")} style={{ flex: 1, padding: "12px 0", borderRadius: 18, background: cargoType === "avia" ? "#7C3AED" : "rgba(255,255,255,0.08)", color: "#fff", fontWeight: 700, fontSize: 14, border: "none", cursor: "pointer" }}>✈️ Авиа ($9/кг)</button>
+          </div>
+          <input style={S.input} type="number" placeholder="Вес в граммах" value={grams} onChange={e => setGrams(e.target.value)} />
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => setCargoCurrency("usd")} style={S.btnLang(cargoCurrency === "usd")}>$ Доллары</button>
+            <button onClick={() => setCargoCurrency("uzs")} style={S.btnLang(cargoCurrency === "uzs")}>Сум</button>
+          </div>
+          {grams && <div style={S.card}>
+            <p style={{ color: "rgba(255,255,255,0.45)", fontSize: 11, marginBottom: 8 }}>Стоимость доставки</p>
+            <p style={{ color: "#fff", fontSize: 22, fontWeight: 700 }}>{cargoResult()} {cargoCurrency === "usd" ? "USD" : "UZS"}</p>
+          </div>}
+        </div>
+      )}
+    </div>
+  );
+}
 export default function App() {
   const [tab, setTab] = useState("resume");
   return (
@@ -229,6 +301,7 @@ export default function App() {
         {tab === "translate" && <TranslateTool />}
         {tab === "poem" && <PoemTool />}
         {tab === "names" && <NamesTool />}
+        {tab === "calc" && <CalcTool />}
       </div>
     </div>
   );
